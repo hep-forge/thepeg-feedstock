@@ -9,7 +9,8 @@ NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
   --prefix="${PREFIX}" \
   --with-gsl="${PREFIX}" \
   --with-lhapdf="${PREFIX}" \
-  --with-fastjet="${PREFIX}"
+  --with-fastjet="${PREFIX}" \
+  --with-zlib="${PREFIX}"
 
 make -j"${NPROC}"
 make install

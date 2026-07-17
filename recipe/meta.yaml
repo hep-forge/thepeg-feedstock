@@ -45,11 +45,13 @@ requirements:
     - fastjet
     - gsl
     - libboost-devel
+    - zlib
   run:
     - lhapdf
     - fastjet
     - gsl
     - libboost-devel
+    - zlib
 
 test:
   commands:
