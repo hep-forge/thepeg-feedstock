@@ -1,5 +1,5 @@
 {% set versions = {
-    "0.0.0": "REPLACE_WITH_SHA256"
+    "2.3.0": "ac35979ae89c29608ca92c156a49ff68aace7a5a12a0c92f0a01a833d2d34572"
 } %}
 
 {% set version = environ.get('COMMIT_VERSION', None) %}
@@ -13,7 +13,11 @@ package:
   version: {{ environ.get('ANACONDA_VERSION', version)|replace("-", ".") }}
 
 source:
-  url: "https://thepeg.hepforge.org/archive/refs/tags/{{ version }}.tar.gz"   # TODO: confirm upstream's actual tag/tarball naming
+  # herwig.hepforge.org's plain downloads?f= links are NOT actually
+  # behind an anti-bot page -- earlier assumption was wrong, verified
+  # with a plain curl -L.
+  url: "https://thepeg.hepforge.org/downloads/?f=ThePEG-{{ version }}.tar.bz2"
+  fn: "ThePEG-{{ version }}.tar.bz2"
   {% if versions.get(version, None) %}
   sha256: {{ versions.get(version) }}
   {% endif %}
@@ -28,21 +32,44 @@ requirements:
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - {{ stdlib('c') }}
-    - cmake
     - make
+    - automake
+    - libtool
   host:
-    # TODO: library dependencies
+    # Herwig (the only current consumer) hard-requires ThePEG to be built
+    # with both LHAPDF and FastJet (AC_MSG_ERROR if either is missing) --
+    # both are plain, unversioned-build-string hep-forge packages, no
+    # root-variant coupling to worry about. GSL and Boost are ThePEG's
+    # own mandatory deps, both satisfied from conda-forge.
+    - lhapdf
+    - fastjet
+    - gsl
+    - libboost-devel
   run:
-    # TODO: runtime dependencies
+    - lhapdf
+    - fastjet
+    - gsl
+    - libboost-devel
 
 test:
   commands:
-    - echo "TODO: a real smoke test"
+    - test -f $PREFIX/lib/ThePEG/libThePEG.so || test -f $PREFIX/lib64/ThePEG/libThePEG.so
 
 about:
   home: "https://thepeg.hepforge.org"
+  dev_url: "https://thepeg.hepforge.org"
   license: "GPL-2.0-or-later"
   summary: "ThePEG: Toolkit for High Energy Physics Event Generation"
+  description: |
+    ThePEG is a toolkit for implementing HEP event generators, used as
+    the common event-generation framework underlying Herwig 7. This
+    build enables LHAPDF and FastJet support (both mandatory for
+    Herwig), plus GSL and Boost (ThePEG's own hard requirements).
+    HepMC/Rivet integration intentionally left disabled for now -- not
+    required by Herwig's own configure checks, and hep-forge's hepmc
+    package's build string is tied to a specific root variant this
+    package has no other need for -- worth revisiting as a separate
+    enhancement.
 
 extra:
   recipe-maintainers:
