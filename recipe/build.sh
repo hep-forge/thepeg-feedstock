@@ -5,8 +5,10 @@ chmod +x configure
 
 # ThePEG uses std::mem_fun and friends, removed in C++17. libc++ keeps them
 # behind these macros; libstdc++ still ships them, so Linux is unaffected.
+# It also uses std::insert_iterator without <iterator>, which libc++ does
+# not pull in through other headers.
 if [[ "$(uname)" == "Darwin" ]]; then
-  export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION"
+  export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -include iterator"
 fi
 
 NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
