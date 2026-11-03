@@ -9,6 +9,9 @@ chmod +x configure
 # not pull in through other headers.
 if [[ "$(uname)" == "Darwin" ]]; then
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -include iterator"
+  # ThePEG's plugin libraries take ThePEG's own symbols from the process that
+  # loads them, which Linux allows by default and macOS only when asked.
+  export LDFLAGS="${LDFLAGS} -Wl,-undefined,dynamic_lookup"
 fi
 
 NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
