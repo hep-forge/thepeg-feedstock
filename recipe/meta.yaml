@@ -55,7 +55,8 @@ requirements:
 
 test:
   commands:
-    - test -f $PREFIX/lib/ThePEG/libThePEG.so || test -f $PREFIX/lib64/ThePEG/libThePEG.so
+    - test -f $PREFIX/lib/ThePEG/libThePEG.so || test -f $PREFIX/lib64/ThePEG/libThePEG.so  # [linux]
+    - test -f $PREFIX/lib/ThePEG/libThePEG.dylib  # [osx]
 
 about:
   home: "https://thepeg.hepforge.org"
