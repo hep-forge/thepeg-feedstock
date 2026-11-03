@@ -3,15 +3,20 @@ set -eux
 
 chmod +x configure
 
+# macOS: the bundled libtool (2.4.6) gives -module plugins
+# "-undefined dynamic_lookup" only for deployment targets 10.*, not for 11.0+
+# as conda uses: backport libtool 2.4.7's fix (as conda-forge's thepeg does).
+if [[ "$(uname)" == "Darwin" ]]; then
+  sed -i.bak $'s/^\t10\\.\\*)$/\t*)/' configure
+  if grep -q $'^\t10\\.\\*)$' configure; then echo "libtool darwin case not patched" >&2; exit 1; fi
+fi
+
 # ThePEG uses std::mem_fun and friends, removed in C++17. libc++ keeps them
 # behind these macros; libstdc++ still ships them, so Linux is unaffected.
 # It also uses std::insert_iterator without <iterator>, which libc++ does
 # not pull in through other headers.
 if [[ "$(uname)" == "Darwin" ]]; then
   export CXXFLAGS="${CXXFLAGS} -D_LIBCPP_ENABLE_CXX17_REMOVED_BINDERS -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION -include iterator"
-  # ThePEG's plugin libraries take ThePEG's own symbols from the process that
-  # loads them, which Linux allows by default and macOS only when asked.
-  export LDFLAGS="${LDFLAGS} -Wl,-undefined,dynamic_lookup"
 fi
 
 NPROC=$(nproc 2>/dev/null || sysctl -n hw.ncpu)
